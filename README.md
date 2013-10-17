@@ -1,0 +1,5 @@
+# Iterative Detection Estimation with Thresholding (IDET)
+
+
+## Abstract
+This paper devotes efforts to develop sparse signal recovery algorithms for compressed sensing. We propose an algorithmic framework, dubbed as **iterative detection estimation with thresholding (IDET)**. IDET takes the one-stage thresholding (OST) as the reference for support detection, and devises support detection methods depended on the character of sparse signals. We present an implementation of IDET and three support detection strategies for fast decaying signals. IDET iteration detects a support set by thresholding the result of the iterative hard thresholding (IHT) iteration and estimates the reconstructed signal by solving a truncated least-squares problem on the support set. The experimental results show IDET exhibits superior reconstruction performance than other accelerated algorithm for IHT.
