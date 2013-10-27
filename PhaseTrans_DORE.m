@@ -18,7 +18,7 @@ delta = linspace(0.05, 0.5,numgradations);  % indeterminacy m/n
 rho = linspace(0.05, 0.5,numgradations); % sparsity k/m
 
 
-numalgorithms = 2; % 算法个数
+numalgorithms = 3; % 算法个数
 
 successrecord = zeros(numalgorithms, numgradations,numgradations,numtrials);
 computationtimes = zeros(numalgorithms, numgradations,numgradations,numtrials);
@@ -80,7 +80,7 @@ IDETfail = 0;
                     Ht          = @(z) Phi'*z;
                     
                     xhat = DORE(H, Ht, y, sparsity, 'Thresh',tolerance, 'visibility',0,'IsHOrthonormal',1);
-                    % 记录第2个算法结果
+                    % 记录第1个算法结果
 					computationtimes(1, sparsitycounter, measurementcounter,ii) = toc(dstart);
 					successrecord(1, sparsitycounter, measurementcounter,ii) = success(x,xhat);                              
                   end
@@ -90,9 +90,20 @@ IDETfail = 0;
 					fprintf('IDET-k ... \t');
 					dstart = tic;
                     xhat                         = IDET(Phi, y, sparsity, 'Tolerance',tolerance);
-                    % 记录第3个算法结果
+                    % 记录第2个算法结果
 					computationtimes(2, sparsitycounter, measurementcounter,ii) = toc(dstart);
 					successrecord(2, sparsitycounter, measurementcounter,ii) = success(x,xhat);
+                  end
+                  
+                  
+                  if ~IDETfail
+					fprintf('SP ... \t');
+					dstart = tic;
+                    options.tol = tolerance;
+                    xhat                         = SP(Phi, y, sparsity, 'Tolerance',tolerance);
+                    % 记录第3个算法结果
+					computationtimes(3, sparsitycounter, measurementcounter,ii) = toc(dstart);
+					successrecord(3, sparsitycounter, measurementcounter,ii) = success(x,xhat);
                   end
                  
                  fprintf('\n');                  
@@ -122,7 +133,7 @@ end
 
 tt = datevec(now);
 str = num2str(tt(6));
-filename = strcat('PhaseTrans_DORE', '_', str, '.mat'); 
+filename = strcat('PhaseTrans_DORE3', '_', str, '.mat'); 
 save(filename)
 % save(filename, 'successrecord', 'computationtimes')
 
@@ -157,17 +168,17 @@ save(filename)
     end
   end
 
-%   stats3 = zeros(numgradations,numgradations);
-%   compstats = zeros(numgradations,numgradations);
-%   for indeterminacycounter = 1:numgradations			% indeterminacy
-%     for sparsitycounter = 1:numgradations	% sparsity
-%       for kk=1:numtrials
-%         stats3(sparsitycounter,indeterminacycounter) = ...
-%           stats3(sparsitycounter,indeterminacycounter) + ...
-%           sum(successrecord(3, sparsitycounter,indeterminacycounter,kk));
-%       end
-%     end
-%   end
+  stats3 = zeros(numgradations,numgradations);
+  compstats = zeros(numgradations,numgradations);
+  for indeterminacycounter = 1:numgradations			% indeterminacy
+    for sparsitycounter = 1:numgradations	% sparsity
+      for kk=1:numtrials
+        stats3(sparsitycounter,indeterminacycounter) = ...
+          stats3(sparsitycounter,indeterminacycounter) + ...
+          sum(successrecord(3, sparsitycounter,indeterminacycounter,kk));
+      end
+    end
+  end
   
  
 %   stats4 = zeros(numgradations,numgradations);
@@ -190,6 +201,8 @@ for ii=1:5:16
 plot(rho,stats1(:,ii)./numtrials,'b-.', 'LineWidth', 8*(20-ii)/20); 
 hold on 
 plot(rho,stats2(:,ii)./numtrials,'k-', 'LineWidth', 8*(20-ii)/20); 
+hold on 
+plot(rho,stats3(:,ii)./numtrials,'g--', 'LineWidth', 8*(20-ii)/20); 
 % hold on 
 % plot(rho,stats4(:,ii)./numtrials,'k-', 'LineWidth', 8*(20-ii)/20); 
 
@@ -221,7 +234,7 @@ axis([0.05 0.5 -0.01 1.01]);
 xlabel(['Sparsity k/m']);
 ylabel('Probability of Exact Recovery');
 grid on;
-legend('DORE','IDET-k');
+legend('DORE','IDET-k','SP');
 % fn = strcat('Fig_PhaseTrans_DORE',  '.fig'); 
 % saveas(gcf, fn) 
 set(gcf,'color','none');
@@ -261,7 +274,7 @@ for alg =1:numalgorithms
 			upsamplefactor = upsamplefactor + 1;
 		end
 			rhoupsampled = interp(rho,upsamplefactor-1);
-			[temp,J] = min(abs(sparseline(I)-0.5));
+			[temp, J] = min(abs(sparseline(I)-0.5));
 			phase(alg, indeterminacycounter) = rhoupsampled(I(J)); % alg 
 	end
 
@@ -272,11 +285,15 @@ plot(delta(1:end),phase(1, 1:end),'b-.', 'LineWidth',3); % alg
 hold on
 plot(delta(1:end),phase(2, 1:end),'k-', 'LineWidth',4); % alg 
 axis([0.05 0.55 0 0.6]);
+hold on
+plot(delta(1:end),phase(3, 1:end),'g--', 'LineWidth',4); % alg 
+axis([0.05 0.55 0 0.6]);
+
 ylabel('Sparsity k/m');
 xlabel('Indeterminacy m/n');
 grid on;
 axis([0.05 0.5 0.05 0.6]);
-legend('DORE','IDET-k');
+legend('DORE','IDET-k','SP');
 % fn = strcat('Fig_PhaseTrans_DORE', '.fig'); 
 % saveas(gcf, fn) 
 set(gcf,'color','none');

@@ -7,9 +7,9 @@ function index
 % m: fixed measurements 
 % k: fixed sparsity level
 clear all
-k = 100;
-m = 500;
-n = 2000;
+k = 20;
+m = 80;
+n = 400;
 ensemble = 'USE';
 opts.sigma = 0;
 opts.gauss = 1;
@@ -20,22 +20,36 @@ opts.gauss = 1;
 % 收敛误差
 tol = 1e-6;
 
-% tic
-% [xt out] = IDET(A, y, k);
-% toc
-% out.iter
-% SupportDetection(x, xt)
+tic
+[xt out] = IDET(A, y, k);
+toc
+out.iter
+SupportDetection(x, xt)
+
 % 
-% 
-% H           = @(z) A*z;
-% Ht          = @(z) A'*z;
-% tic
-% [xt out] = IDET(H, y, k, 'At', Ht, 'MaxIt', 20);
-% toc
-% out.iter
-% SupportDetection(x, xt)
+H           = @(z) A*z;
+Ht          = @(z) A'*z;
+tic
+[xt out] = IDET(H, y, k, 'At', Ht, 'MaxIt', 20);
+toc
+out.iter
+SupportDetection(x, xt)
 
 
+tic
+[xt out] = SP(A, y, k);
+toc
+out.iter
+SupportDetection(x, xt)
+
+
+H           = @(z) A*z;
+Ht          = @(z) A'*z;
+tic
+[xt out] = SP(H, y, k, 'At', Ht, 'MaxIt', 20);
+toc
+out.iter
+SupportDetection(x, xt)
 
 
 
@@ -67,30 +81,6 @@ tol = 1e-6;
 % SupportDetection(x, xt)
 
 
-
-
-
-% [xt out] = SWGP(A, y, 0.7);
-% out.iter
-% SupportDetection(x, xt)
-% 
-% H           = @(z) A*z;
-% Ht          = @(z) A'*z;
-% [xt out] = SWGP(H, y, 0.7, 'At', Ht, 'MaxIt', 20);
-% out.iter
-% SupportDetection(x, xt)
-
-
-
-
-%  xt = GDE(A, y, k );
-
-% H           = @(z) A*z;
-% Ht          = @(z) A'*z;
-% z_init = zeros(n, 1);
-% [xt,A_index,Count,GML_record] = AHT(H,Ht,y,z_init,1,1);
-% Count
-% SupportDetection(x, xt)
 
 % tic
 % Len_thresh=1;          
@@ -125,52 +115,10 @@ tol = 1e-6;
 % Count
 % SupportDetection(x, xt)
 % toc
-% 
-% tic
-% [xt, Out] = TEMP(A, y, 1, 'Tolerance', tol);
-% Out.iter
-% SupportDetection(x, xt)
-% toc
-
-% 
-% tic
-% H           = @(z) A*z;
-% Ht          = @(z) A'*z;
-% [xt, Out] = TEMP(H, y, 1, 'At', Ht, 'MaxIt',100);
-% Out.iter
-% SupportDetection(x, xt)
-% toc
-
-% tic
-% [xt, Out] = EMTP(A, y, k, 1, 'Tolerance',tol);
-% Out.iter
-% SupportDetection(x, xt)
-% toc
-
-% H           = @(z) A*z;
-% Ht          = @(z) A'*z;
-% [xt, Out] = EMTP(H, y, k, 1, 'At', Ht, 'MaxIt',10);
-% Out.iter
-% SupportDetection(x, xt)
 
 
-% tic
-% [xt, Out] = EMTPbeta(A, y, 0.5, 'Tolerance',tol);
-% Out.iter
-% SupportDetection(x, xt)
-% toc
 
-% H           = @(z) A*z;
-% Ht          = @(z) A'*z;
-% [xt, Out] = EMTPbeta(H, y, 0.5, 'At', Ht, 'MaxIt',100);
-% Out.iter
-% SupportDetection(x, xt)
 
-% tic
-% [xt, Out] = EMTPgamma(A, y, 0.8, 'Tolerance',tol);
-% Out.iter
-% SupportDetection(x, xt)
-% toc
 
 % SupportDetection(x, xt)
 % % SupportDetection(x, xbar) % 对比原始信号与重构信号

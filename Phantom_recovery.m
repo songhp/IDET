@@ -39,7 +39,7 @@ scale=max(Imgcntr)-min(Imgcntr);
 
 %Sampling operator
 % number of radial lines in the Fourier domain
-[M,Mh,mh,mhi]=LineMask(RadialNum,mx);
+[M, Mh, mh, mhi]=LineMask(RadialNum,mx);
 OMEGA=mhi;
 smpl_pattern=fftshift(M);
 
@@ -75,7 +75,7 @@ r_init=length(find(abs(phantom_coeff(:))>0));    %sparsity level for hard thresh
 
 z_init=zeros(m,1);
 tic;
-[s_DORE,A_index_DORE,Count_DORE]=DORE01(H,Ht,y,r_init,'Thresh',thresh,'visibility',0);
+[s_DORE, A_index_DORE, Count_DORE] = DORE(H, Ht, y, r_init, 'Thresh', thresh, 'visibility', 0);
 % 停止标准: 相对误差thresh, 最大迭代次数1000
 t_DORE=toc
 Count_DORE
@@ -83,6 +83,17 @@ s_DORE=reshape(s_DORE,[my mx]);
 Img2D_DORE=W(s_DORE);
 Img2D_DORE=Img2D_DORE+Img2Dbar;
 PSNR_DORE=psnr(Img2D,Img2D_DORE,scale)
+
+%solve by SP
+tic;
+[s_SP Out] = SP(H, y, r_init, 'At', Ht, 'MaxIt',20,'Tolerance', thresh);
+t_SP = toc
+Count_SP = Out.iter
+s_SP = reshape(s_SP,[my mx]);
+Img2D_SP = W(s_SP);
+Img2D_SP = Img2D_SP+Img2Dbar;
+PSNR_SP = psnr(Img2D,Img2D_SP,scale)
+
 
 %solve by IDET
 tic;
@@ -97,7 +108,7 @@ PSNR_IDET=psnr(Img2D,Img2D_IDET,scale)
 %solve by IDETbeta
 tic;
 [s_IDETbeta Out] = IDETbeta(H, y, 0.8, 'At', Ht, 'MaxIt',20,'Tolerance', thresh);
-% bata >0.8
+% beta >0.8
 t_IDETbeta = toc
 Count_IDETbeta = Out.iter
 s_IDETbeta=reshape(s_IDETbeta,[my mx]);
@@ -115,17 +126,6 @@ s_IDETgamma=reshape(s_IDETgamma,[my mx]);
 Img2D_IDETgamma=W(s_IDETgamma);
 Img2D_IDETgamma=Img2D_IDETgamma+Img2Dbar;
 PSNR_IDETgamma=psnr(Img2D,Img2D_IDETgamma,scale)
-
-% %solve by SWGP
-% tic;
-% [s_SWGP Out] = SWGP(H, y, 0.8, 'At', Ht, 'MaxIt',20,'Tolerance', thresh);
-% % gamma 0.5-0.8
-% t_SWGP = toc
-% Count_SWGP = Out.iter
-% s_SWGP =reshape(s_SWGP,[my mx]);
-% Img2D_SWGP =W(s_SWGP);
-% Img2D_SWGP =Img2D_SWGP+Img2Dbar;
-% PSNR_SWGP =psnr(Img2D,Img2D_SWGP,scale)
 
 
 %Plotting
@@ -148,36 +148,6 @@ axis equal
 title('The 44 radial lines frequency sampling', 'fontsize',6);
 
 
-% subplot(3,3,3)
-% imagesc(Img2D_BackProj)
-% colormap(gray)
-% box off
-% axis off
-% title(['Back projectiom recovery (PSNR=',num2str(PSNR_BackProj),')'], 'fontsize',6);
-% 
-% 
-% subplot(3,3,4)
-% imagesc(Img2D_GPSR0)
-% colormap(gray)
-% box off
-% axis off
-% title(['(d) GPSR_0 recovery (PSNR=',num2str(PSNR_GPSR),')'], 'fontsize',6);
-% 
-% 
-% subplot(3,3,5)
-% imagesc(Img2D_GPSR)
-% colormap(gray)
-% box off
-% axis off
-% title(['(e) GPSR recovery (PSNR=',num2str(PSNR_GPSR),')'], 'fontsize',6);
-
-
-% subplot(3,3,3)
-% imagesc(Img2D_ADORE)
-% colormap(gray)
-% box off
-% axis off
-% title(['DORE recovery (PSNR=',num2str(PSNR_ADORE),')'], 'fontsize',6);
 
 
 subplot(3,3,5)
@@ -225,9 +195,9 @@ if RadialNum == 44
 end
 
 
-PSNR  = [PSNR_DORE, PSNR_IDET, PSNR_IDETbeta, PSNR_IDETgamma];
-Count = [Count_DORE, Count_IDET, Count_IDETbeta, Count_IDETgamma];
-t     = [t_DORE, t_IDET, t_IDETbeta, t_IDETgamma];
+PSNR  = [PSNR_DORE, PSNR_SP, PSNR_IDET, PSNR_IDETbeta, PSNR_IDETgamma];
+Count = [Count_DORE, Count_SP, Count_IDET, Count_IDETbeta, Count_IDETgamma];
+t     = [t_DORE, t_SP, t_IDET, t_IDETbeta, t_IDETgamma];
 
 
 save([img_name,num2str(my),'by',num2str(mx),'_RadialNum',num2str(RadialNum),'_thresh',num2str(thresh),'.mat']);
